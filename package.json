@@ -1,0 +1,9 @@
+{
+  "name": "evaluation-system-root",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix ./eval-system run dev -- --host 0.0.0.0",
+    "build": "npm --prefix ./eval-system run build",
+    "install": "npm --prefix ./eval-system install"
+  }
+}

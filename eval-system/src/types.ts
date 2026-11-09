@@ -9,6 +9,10 @@ export interface Subject {
   id: string
   name: string
   group: string
+  title?: string
+  email?: string
+  avatar?: string
+  subjects?: string[]
 }
 
 export interface Evaluation {
@@ -18,6 +22,8 @@ export interface Evaluation {
   scores: Record<string, number>
   comment: string
   date: string
+  subject?: string
+  isAnonymous?: boolean
 }
 
 export interface AppData {
