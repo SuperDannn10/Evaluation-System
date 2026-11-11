@@ -4,9 +4,7 @@ import {
   BarChart3,
   BookOpenCheck,
   Eye,
-  EyeOff,
   FileText,
-  KeyRound,
   MessageSquareText,
   Pencil,
   Plus,
@@ -21,7 +19,7 @@ import {
 import Results from './Results'
 import Setup from './Setup'
 import TeacherPortrait from './TeacherPortrait'
-import { createStudentAccount, listStudentAccounts, removeStudentAccount } from './studentAuth'
+import { listStudentAccounts, removeStudentAccount } from './studentAuth'
 import type { Student } from './studentAuth'
 import { uid, weightedScore } from './store'
 import type { AppData, Subject } from './types'
@@ -51,15 +49,8 @@ const emptyTeacherForm: TeacherForm = {
 
 function StudentAccountsPanel() {
   const [accounts, setAccounts] = useState<Student[]>([])
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [idNumber, setIdNumber] = useState('')
-  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
-  const [createdCredentials, setCreatedCredentials] = useState<Student & { password: string } | null>(null)
-  const [busy, setBusy] = useState(false)
-  const [passwordVisible, setPasswordVisible] = useState(false)
 
   useEffect(() => {
     try {
@@ -69,35 +60,12 @@ function StudentAccountsPanel() {
     }
   }, [])
 
-  async function addStudent(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setError('')
-    setNotice('')
-    setCreatedCredentials(null)
-    setBusy(true)
-    try {
-      const account = await createStudentAccount(name, email, idNumber, password)
-      setAccounts(listStudentAccounts())
-      setCreatedCredentials({ ...account, password })
-      setName('')
-      setEmail('')
-      setIdNumber('')
-      setPassword('')
-      setNotice('Student account created. Share these credentials with the student securely.')
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Unable to create the student account.')
-    } finally {
-      setBusy(false)
-    }
-  }
-
   function deleteStudent(account: Student) {
     if (!window.confirm(`Remove the student account for ${account.name} (${account.email})?`)) return
     try {
       removeStudentAccount(account.email)
       setAccounts(listStudentAccounts())
       setNotice(`Removed the account for ${account.email}.`)
-      setCreatedCredentials(null)
       setError('')
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Unable to remove the student account.')
@@ -110,60 +78,9 @@ function StudentAccountsPanel() {
         <div>
           <span className="portal-overline">Student access</span>
           <h3>Student accounts</h3>
-          <p className="admin-subtitle">Create sign-in credentials for students. The password is shown once after creation.</p>
+          <p className="admin-subtitle">View and manage student accounts. Students can register from the Student Portal.</p>
         </div>
         <span className="admin-panel-icon"><UserPlus size={20} /></span>
-      </div>
-      <div className="student-account-create">
-        <div className="student-account-form-heading">
-          <span className="student-account-form-icon"><KeyRound size={17} /></span>
-          <div><strong>Create student sign-in</strong><small>Set up an account for a student to access the evaluation portal.</small></div>
-        </div>
-        <form className="student-account-form" onSubmit={addStudent}>
-          <label>
-            Student name
-            <input autoComplete="name" required value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Alex Dela Cruz" />
-          </label>
-          <label>
-            Student email
-            <input type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="student@school.edu" />
-          </label>
-          <label>
-            Student ID number
-            <input autoComplete="off" required value={idNumber} onChange={(event) => setIdNumber(event.target.value)} placeholder="e.g. 2026-00123" />
-          </label>
-          <div className="student-password-field">
-            <label htmlFor="student-temp-password">Temporary password</label>
-            <div className="student-password-control">
-              <input
-                id="student-temp-password"
-                type={passwordVisible ? 'text' : 'password'}
-                autoComplete="new-password"
-                required
-                minLength={8}
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="Create a password"
-              />
-              <button
-                type="button"
-                className="student-password-toggle"
-                aria-label={passwordVisible ? 'Hide password' : 'Show password'}
-                aria-pressed={passwordVisible}
-                onClick={() => setPasswordVisible((visible) => !visible)}
-              >
-                {passwordVisible ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-            <small>Use at least 8 characters.</small>
-          </div>
-          <div className="student-account-submit">
-            <button className="portal-button portal-button-gold" type="submit" disabled={busy}>
-              <Plus size={16} />{busy ? 'Creating account…' : 'Create student account'}
-            </button>
-            <small>The credentials will appear below after creation.</small>
-          </div>
-        </form>
       </div>
       {error && <p className="form-error" role="alert">{error}</p>}
       {notice && <p className="student-account-notice" role="status">{notice}</p>}
@@ -175,17 +92,8 @@ function StudentAccountsPanel() {
             <div><strong>{account.name}</strong><small>{account.idNumber ? `ID: ${account.idNumber} · ` : ''}{account.email}</small></div>
             <button className="delete-action" onClick={() => deleteStudent(account)} aria-label={`Remove ${account.name}`} title="Remove account"><Trash2 size={16} /></button>
           </article>
-        )) : <p className="portal-empty compact">No student accounts yet. Create an account above.</p>}
+        )) : <p className="portal-empty compact">No student accounts have registered yet.</p>}
       </div>
-      {createdCredentials && (
-        <div className="student-credentials" role="status">
-          <div><strong>Share these credentials with {createdCredentials.name}</strong><button type="button" onClick={() => setCreatedCredentials(null)}>Dismiss</button></div>
-          {createdCredentials.idNumber && <p>Student ID: <strong>{createdCredentials.idNumber}</strong></p>}
-          <p>Email: <strong>{createdCredentials.email}</strong></p>
-          <p>Temporary password: <strong>{createdCredentials.password}</strong></p>
-          <small>This password is shown once and is not saved in readable form.</small>
-        </div>
-      )}
       <p className="student-account-warning">Demo only: accounts are stored in this browser. This does not provide production-grade authentication.</p>
     </section>
   )

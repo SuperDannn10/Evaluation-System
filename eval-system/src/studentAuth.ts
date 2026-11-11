@@ -1,5 +1,4 @@
 import { hashPassword } from './password'
-import { signInWithGoogleProvider, signOutGoogleProvider } from './googleAuth'
 
 export interface Student {
   name: string
@@ -13,6 +12,7 @@ export interface StudentAccount extends Student {
 
 const ACCOUNTS_KEY = 'evaluation-system-students-v1'
 const SESSION_KEY = 'evaluation-system-student-session-v1'
+const ADMIN_SESSION_KEY = 'evaluation-system-admin-session-v2'
 
 function readAccounts(): StudentAccount[] {
   const raw = localStorage.getItem(ACCOUNTS_KEY)
@@ -36,29 +36,41 @@ function readAccounts(): StudentAccount[] {
 }
 
 function startSession(account: StudentAccount): Student {
-  localStorage.removeItem('evaluation-system-admin-session-v2')
+  localStorage.removeItem(ADMIN_SESSION_KEY)
   localStorage.setItem(SESSION_KEY, account.email)
   return { name: account.name, email: account.email, idNumber: account.idNumber }
 }
 
-export async function createStudentAccount(name: string, email: string, idNumber: string, password: string): Promise<Student> {
+async function saveStudentAccount(name: string, email: string, password: string, idNumber?: string): Promise<StudentAccount> {
   const normalizedEmail = email.trim().toLowerCase()
   const trimmedName = name.trim()
-  const trimmedIdNumber = idNumber.trim()
-  if (!trimmedName || !normalizedEmail || !trimmedIdNumber) throw new Error('Enter the student name, email address, and ID number.')
+  const trimmedIdNumber = idNumber?.trim()
+  if (!trimmedName || !normalizedEmail || (idNumber !== undefined && !trimmedIdNumber)) {
+    throw new Error(idNumber === undefined ? 'Enter the student name and email address.' : 'Enter the student name, email address, and ID number.')
+  }
   if (password.length < 8) throw new Error('Choose a password with at least 8 characters.')
 
   const accounts = readAccounts()
   if (accounts.some((account) => account.email === normalizedEmail)) {
     throw new Error('An account with this email already exists. Please log in instead.')
   }
-  if (accounts.some((account) => account.idNumber?.toLowerCase() === trimmedIdNumber.toLowerCase())) {
+  if (trimmedIdNumber && accounts.some((account) => account.idNumber?.toLowerCase() === trimmedIdNumber.toLowerCase())) {
     throw new Error('A student account with this ID number already exists.')
   }
 
-  const account = { name: trimmedName, email: normalizedEmail, idNumber: trimmedIdNumber, passwordHash: await hashPassword(password) }
+  const account: StudentAccount = {
+    name: trimmedName,
+    email: normalizedEmail,
+    ...(trimmedIdNumber ? { idNumber: trimmedIdNumber } : {}),
+    passwordHash: await hashPassword(password),
+  }
   localStorage.setItem(ACCOUNTS_KEY, JSON.stringify([...accounts, account]))
-  return { name: account.name, email: account.email, idNumber: account.idNumber }
+  return account
+}
+
+export async function registerStudentAccount(name: string, email: string, idNumber: string, password: string): Promise<Student> {
+  const account = await saveStudentAccount(name, email, password, idNumber.trim() || undefined)
+  return startSession(account)
 }
 
 export function listStudentAccounts(): Student[] {
@@ -85,17 +97,6 @@ export async function loginStudent(name: string, email: string, password: string
   return startSession(account)
 }
 
-export async function loginStudentWithGoogle(): Promise<Student> {
-  const profile = await signInWithGoogleProvider()
-  const accounts = readAccounts()
-  const existingAccount = accounts.find((account) => account.email === profile.email)
-  if (existingAccount) return startSession(existingAccount)
-
-  const account: StudentAccount = { ...profile, passwordHash: '' }
-  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify([...accounts, account]))
-  return startSession(account)
-}
-
 export function getCurrentStudent(): Student | null {
   const email = localStorage.getItem(SESSION_KEY)
   if (!email) return null
@@ -108,6 +109,5 @@ export function getCurrentStudent(): Student | null {
 }
 
 export async function logoutStudent(): Promise<void> {
-  await signOutGoogleProvider()
   localStorage.removeItem(SESSION_KEY)
 }

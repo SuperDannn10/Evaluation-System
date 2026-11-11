@@ -3,8 +3,7 @@ import type { FormEvent } from 'react'
 import { Eye, EyeOff, GraduationCap, KeyRound, ShieldCheck, UserRound } from 'lucide-react'
 import { ADMIN_EMAIL, loginAdmin } from './adminAuth'
 import type { Admin } from './adminAuth'
-import { isGoogleSignInConfigured } from './googleAuth'
-import { loginStudent, loginStudentWithGoogle } from './studentAuth'
+import { loginStudent, registerStudentAccount } from './studentAuth'
 import type { Student } from './studentAuth'
 
 interface Props {
@@ -14,16 +13,18 @@ interface Props {
 }
 
 type Role = 'student' | 'admin'
+type StudentAuthMode = 'signin' | 'signup'
 
 export default function Auth({ onStudentAuthenticated, onAdminAuthenticated, initialError }: Props) {
   const [role, setRole] = useState<Role>('student')
+  const [studentAuthMode, setStudentAuthMode] = useState<StudentAuthMode>('signin')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [idNumber, setIdNumber] = useState('')
   const [password, setPassword] = useState('')
   const [passwordVisible, setPasswordVisible] = useState(false)
   const [error, setError] = useState(initialError ?? '')
   const [busy, setBusy] = useState(false)
-  const [googleBusy, setGoogleBusy] = useState(false)
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -31,7 +32,10 @@ export default function Auth({ onStudentAuthenticated, onAdminAuthenticated, ini
     setBusy(true)
     try {
       if (role === 'student') {
-        onStudentAuthenticated(await loginStudent(name, email, password))
+        const student = studentAuthMode === 'signup'
+          ? await registerStudentAccount(name, email, idNumber, password)
+          : await loginStudent(name, email, password)
+        onStudentAuthenticated(student)
       } else {
         onAdminAuthenticated(loginAdmin(email, password))
       }
@@ -42,24 +46,20 @@ export default function Auth({ onStudentAuthenticated, onAdminAuthenticated, ini
     }
   }
 
-  async function continueWithGoogle() {
-    setError('')
-    setGoogleBusy(true)
-    try {
-      onStudentAuthenticated(await loginStudentWithGoogle())
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Unable to sign in with Google. Please try again.')
-    } finally {
-      setGoogleBusy(false)
-    }
-  }
-
   function changeRole(nextRole: Role) {
     setRole(nextRole)
+    setStudentAuthMode('signin')
     setName('')
     setEmail(nextRole === 'admin' ? ADMIN_EMAIL : '')
+    setIdNumber('')
     setPassword('')
     setPasswordVisible(false)
+    setError('')
+  }
+
+  function changeStudentAuthMode(nextMode: StudentAuthMode) {
+    setStudentAuthMode(nextMode)
+    setPassword('')
     setError('')
   }
 
@@ -100,8 +100,14 @@ export default function Auth({ onStudentAuthenticated, onAdminAuthenticated, ini
 
         <form className="auth-form" onSubmit={submit}>
           <div className="auth-form-heading">
-            <span className="auth-section-label">{role === 'student' ? 'Student sign in' : 'Administrator sign in'}</span>
-            <span className="auth-existing-account">Use your existing account</span>
+            <span className="auth-section-label">
+              {role === 'student'
+                ? studentAuthMode === 'signup' ? 'Create student account' : 'Student sign in'
+                : 'Administrator sign in'}
+            </span>
+            {role === 'student' && studentAuthMode === 'signin' && (
+              <span className="auth-existing-account">Use your existing account</span>
+            )}
           </div>
           {role === 'student' && (
             <label className="auth-labeled-input">
@@ -115,6 +121,21 @@ export default function Auth({ onStudentAuthenticated, onAdminAuthenticated, ini
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   placeholder="Enter your full name"
+                />
+              </span>
+            </label>
+          )}
+          {role === 'student' && studentAuthMode === 'signup' && (
+            <label className="auth-labeled-input">
+              Student ID (optional)
+              <span className="auth-input-control">
+                <GraduationCap size={16} aria-hidden="true" />
+                <input
+                  type="text"
+                  autoComplete="off"
+                  value={idNumber}
+                  onChange={(event) => setIdNumber(event.target.value)}
+                  placeholder="Enter your student ID"
                 />
               </span>
             </label>
@@ -140,11 +161,12 @@ export default function Auth({ onStudentAuthenticated, onAdminAuthenticated, ini
               <KeyRound className="auth-input-icon" size={16} aria-hidden="true" />
               <input
                 type={passwordVisible ? 'text' : 'password'}
-                autoComplete="current-password"
+                autoComplete={studentAuthMode === 'signup' && role === 'student' ? 'new-password' : 'current-password'}
+                minLength={role === 'student' && studentAuthMode === 'signup' ? 8 : undefined}
                 required
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                placeholder="Enter your password"
+                placeholder={studentAuthMode === 'signup' && role === 'student' ? 'At least 8 characters' : 'Enter your password'}
               />
               <button
                 type="button"
@@ -158,37 +180,27 @@ export default function Auth({ onStudentAuthenticated, onAdminAuthenticated, ini
             </span>
           </label>
           {error && <p className="form-error" role="alert">{error}</p>}
-          <button className="primary auth-submit" type="submit" disabled={busy || googleBusy}>
-            {busy ? 'Please wait…' : 'Sign In to Portal'}
+          <button className="primary auth-submit" type="submit" disabled={busy}>
+            {busy ? 'Please wait…' : role === 'student' && studentAuthMode === 'signup' ? 'Create Account' : 'Sign In to Portal'}
           </button>
         </form>
 
-        {role === 'student' && (
-          <>
-            <div className="auth-divider"><span>or</span></div>
-            <button
-              className="google-signin-button"
-              type="button"
-              onClick={continueWithGoogle}
-              disabled={busy || googleBusy || !isGoogleSignInConfigured}
-              title={isGoogleSignInConfigured ? 'Continue with Google' : 'Add Firebase settings to eval-system/.env.local to enable Google sign-in'}
-            >
-              <svg aria-hidden="true" viewBox="0 0 48 48" width="19" height="19">
-                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z" transform="translate(0 6)" />
-                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.74 7.18l7.65 5.94c4.47-4.13 7.13-10.2 7.13-17.59Z" />
-                <path fill="#FBBC05" d="M10.53 28.59a14.4 14.4 0 0 1 0-9.18l-7.98-6.19a23.9 23.9 0 0 0 0 21.56l7.98-6.19Z" transform="translate(0 6)" />
-                <path fill="#34A853" d="M24 48c6.47 0 11.9-2.13 15.85-5.8l-7.65-5.94c-2.13 1.43-4.85 2.27-8.2 2.27-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z" transform="translate(0 -6)" />
-              </svg>
-              {googleBusy ? 'Connecting to Google…' : 'Continue with Google'}
-            </button>
-            {!isGoogleSignInConfigured && (
-              <p className="google-signin-hint">Google sign-in is not configured yet. Add your Firebase web settings to <code>eval-system/.env.local</code> and restart the app.</p>
-            )}
-          </>
-        )}
-
         {role === 'student'
-          ? <p className="auth-footnote">Student accounts are provided by your administrator. Demo accounts are stored only in this browser.</p>
+          ? (
+            <>
+              <p className="auth-account-switch">
+                {studentAuthMode === 'signin' ? 'New student?' : 'Already have an account?'}{' '}
+                <button
+                  type="button"
+                  onClick={() => changeStudentAuthMode(studentAuthMode === 'signin' ? 'signup' : 'signin')}
+                  disabled={busy}
+                >
+                  {studentAuthMode === 'signin' ? 'Create an account' : 'Sign in'}
+                </button>
+              </p>
+              <p className="auth-footnote">Student accounts are stored only in this browser and are not shared across devices.</p>
+            </>
+          )
           : <p className="auth-footnote">Demo admin: {ADMIN_EMAIL} / admin12345. This demo login is not secure for real data.</p>}
       </section>
     </main>

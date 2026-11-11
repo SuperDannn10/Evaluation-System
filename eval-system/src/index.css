@@ -315,29 +315,9 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .auth-form .auth-password-toggle:hover { transform: translateY(-50%); color: var(--primary); background: rgba(29,78,137,.07); }
 .auth-password-toggle:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
 .auth-submit { width: 100%; margin-top: .25rem; padding: .85rem 1rem; font-weight: 700; }
-.auth-divider { display: flex; align-items: center; gap: .75rem; margin: 1.15rem 0; color: #8190a3; font-size: .75rem; }
-.auth-divider::before, .auth-divider::after { height: 1px; flex: 1; background: rgba(23,50,77,.12); content: ""; }
-.google-signin-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: .7rem;
-  width: 100%;
-  min-height: 48px;
-  padding: .7rem 1rem;
-  border: 1px solid rgba(23,50,77,.16);
-  border-radius: 12px;
-  color: #26394d;
-  background: rgba(255,255,255,.82);
-  font-size: .88rem;
-  font-weight: 650;
-  transition: background-color .15s ease, border-color .15s ease, opacity .15s ease;
-}
-.google-signin-button:hover:not(:disabled) { transform: none; border-color: rgba(23,50,77,.28); background: #fff; }
-.google-signin-button:disabled { opacity: .58; cursor: not-allowed; }
-.google-signin-button:focus-visible { outline: 3px solid rgba(29,78,137,.35); outline-offset: 2px; }
-.google-signin-hint { margin-top: .6rem; color: #60738a; font-size: .72rem; line-height: 1.5; }
-.google-signin-hint code { color: #37546f; font-size: .68rem; }
+.auth-account-switch { margin-top: 1.1rem; color: #b6c1d2; font-size: .78rem; text-align: center; }
+.auth-account-switch button { padding: .1rem .2rem; border: 0; color: #f2b51e; background: transparent; font-size: inherit; font-weight: 700; }
+.auth-account-switch button:hover:not(:disabled) { transform: none; text-decoration: underline; }
 .auth-footnote { margin-top: 1.2rem; color: var(--muted); font-size: .78rem; text-align: center; }
 .form-error {
   padding: .7rem .8rem;
@@ -976,39 +956,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .admin-stat-card strong { display: block; margin-top: .25rem; color: #f4f7fc; font-size: 1.35rem; line-height: 1.2; }
 .admin-stat-card .top-teacher-name { max-width: 150px; overflow: hidden; font-size: .87rem; text-overflow: ellipsis; white-space: nowrap; }
 .admin-panel { padding: 1.2rem; border: 1px solid var(--night-line); border-radius: 17px; background: var(--night-panel); box-shadow: 0 12px 35px rgba(0,0,0,.12); }
-.student-account-create { margin-top: 1.25rem; padding: clamp(1.25rem, 3vw, 2rem); border: 1px solid rgba(123,158,207,.2); border-radius: 18px; background: linear-gradient(145deg, rgba(28,49,78,.7), rgba(17,34,57,.68)); box-shadow: 0 14px 32px rgba(0,0,0,.12); }
-.student-account-form-heading { display: flex; align-items: center; gap: .85rem; margin-bottom: 1.35rem; }
-.student-account-form-icon { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; border: 1px solid rgba(246,189,75,.22); border-radius: 13px; color: var(--portal-gold); background: rgba(246,189,75,.1); }
-.student-account-form-heading > div { display: grid; gap: .12rem; }
-.student-account-form-heading strong { color: #e8eef8; font-size: .92rem; }
-.student-account-form-heading small { color: #a0aec2; font-size: .75rem; }
-.student-account-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 1.1rem; max-width: 900px; }
-.student-account-form > label, .student-password-field > label { display: grid; gap: .45rem; color: #d1d9e6; font-size: .78rem; font-weight: 650; }
-.portal-shell .student-account-form input {
-  width: 100%;
-  min-width: 0;
-  margin: 0;
-  min-height: 48px;
-  padding: .8rem .9rem;
-  border: 1px solid var(--night-line);
-  border-radius: 10px;
-  outline: 0;
-  color: #e7eef9;
-  background: rgba(6,15,29,.28);
-  box-shadow: none;
-  font-size: .84rem;
-}
-.portal-shell .student-account-form input::placeholder { color: #73839a; }
-.portal-shell .student-account-form input:focus { border-color: rgba(246,189,75,.56); box-shadow: 0 0 0 3px rgba(246,189,75,.09); }
-.student-password-field { display: grid; gap: .45rem; }
-.student-password-field > label { color: #d1d9e6; font-size: .78rem; font-weight: 650; }
-.student-password-control { position: relative; }
-.portal-shell .student-password-control input { padding-right: 2.8rem; }
-.portal-shell .student-password-toggle { position: absolute; top: 50%; right: .45rem; display: grid; place-items: center; width: 32px; height: 32px; padding: 0; transform: translateY(-50%); border: 0; border-radius: 7px; color: #94a4ba; background: transparent; }
-.portal-shell .student-password-toggle:hover { color: #f3cb6a; background: rgba(255,255,255,.05); }
-.student-password-field > small, .student-account-submit > small { color: #9baac0; font-size: .7rem; }
-.student-account-submit { display: grid; align-content: end; justify-items: stretch; gap: .5rem; }
-.student-account-submit .portal-button { min-height: 48px; width: 100%; font-size: .82rem; }
 .admin-panel > .form-error { margin-top: .75rem; border-color: rgba(255,131,131,.2); color: #ffc0c0; background: rgba(222,92,92,.09); }
 .student-account-notice { padding: .65rem .75rem; border: 1px solid rgba(55,198,176,.16); border-radius: 10px; background: rgba(55,198,176,.045); }
 .student-account-list { display: grid; gap: .5rem; margin-top: 1.25rem; }
@@ -1020,13 +967,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .student-account-row small { overflow: hidden; color: #94a2b7; font-size: .67rem; text-overflow: ellipsis; white-space: nowrap; }
 .student-account-row .delete-action { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid rgba(222,92,92,.18); border-radius: 8px; color: #ee9292; background: rgba(222,92,92,.07); }
 .student-account-notice { margin-top: .8rem; color: #82ddbc; font-size: .72rem; }
-.student-credentials { display: grid; gap: .4rem; margin-top: .8rem; padding: .9rem; border: 1px solid rgba(55,198,176,.24); border-radius: 13px; color: #b7c8dc; background: linear-gradient(135deg, rgba(30,104,89,.14), rgba(55,198,176,.045)); font-size: .7rem; }
-.student-credentials > div { display: flex; justify-content: space-between; align-items: center; gap: .7rem; }
-.student-credentials > div strong { color: #8fe0c8; }
-.student-credentials button { padding: .3rem .5rem; border: 1px solid var(--night-line); border-radius: 7px; color: #c4d2e3; background: rgba(255,255,255,.04); font-size: .65rem; }
-.student-credentials p { overflow-wrap: anywhere; margin: 0; }
-.student-credentials p strong { color: #e7eef9; }
-.student-credentials small { color: #92a4bc; }
 .student-account-warning { margin-top: .8rem; color: #9c8c68; font-size: .66rem; }
 .admin-panel-heading { align-items: center; }
 .admin-panel-heading h3 { color: #edf3fc; font-size: 1rem; }
@@ -1111,7 +1051,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   .portal-header-actions { width: 100%; justify-content: space-between; }
   .portal-main { width: min(100% - 2rem, 780px); padding-top: 1.4rem; }
   .admin-stat-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .student-account-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .portal-hero-art { right: 4%; transform: translateY(-50%) scale(.8); transform-origin: right center; }
 }
 @media (max-width: 600px) {
@@ -1122,7 +1061,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   .portal-switcher { width: 100%; }
   .portal-switch { flex: 1; padding: .55rem .35rem; font-size: .67rem; }
   .portal-user { align-self: flex-end; }
-  .student-account-form { grid-template-columns: 1fr; }
   .portal-main { width: calc(100% - 1.25rem); padding-top: 1rem; }
   .portal-hero { min-height: 260px; padding: 1.3rem; }
   .portal-hero-copy { width: 100%; }
@@ -1342,19 +1280,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 }
 .auth-layout .auth-submit:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.04); }
 .auth-layout .auth-submit:disabled { opacity: .65; }
-.auth-divider { margin: 1rem 0; color: #8592a7; }
-.auth-divider::before, .auth-divider::after { background: rgba(151, 170, 201, .16); }
-.auth-layout .google-signin-button {
-  min-height: 48px;
-  border-color: rgba(151, 170, 201, .2);
-  border-radius: 10px;
-  color: #dce4f0;
-  background: #1b2538;
-  font-size: .84rem;
-}
-.auth-layout .google-signin-button:hover:not(:disabled) { border-color: rgba(247, 179, 24, .4); background: #222f46; }
-.auth-layout .google-signin-hint { color: #9aa8bd; }
-.auth-layout .google-signin-hint code { color: #d3dced; }
 .auth-layout .form-error { border-color: rgba(255, 131, 131, .25); color: #ffc0c0; background: rgba(222, 92, 92, .1); }
 .auth-layout .auth-footnote { margin: 1rem 0 0; color: #8492a8; font-size: .66rem; line-height: 1.5; }
 @media (max-width: 480px) {
